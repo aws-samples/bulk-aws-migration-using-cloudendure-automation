@@ -2,9 +2,10 @@
 # Automated bulk AWS migration using CloudEndure 
 Templates and scripts to automate the aws migration using CloudEndure.
 This solution is ideal for bulk migration of 2 to 25+ servers in one go.
-With this approach the servers are migrated in batches which are called as migration 'wave'.
 
-If you have 50+ servers it is best to use the Migration factory solution mentioned here https://docs.aws.amazon.com/solutions/latest/aws-cloudendure-migration-factory-solution/welcome.html
+With this approach the servers are migrated in batches which is called as migration 'wave'.
+
+If you have 50+ servers, it is recommended to use the Migration factory solution mentioned here https://docs.aws.amazon.com/solutions/latest/aws-cloudendure-migration-factory-solution/welcome.html
 
 The python scripts are referenced from the [automating-aws-migration-with-cloudendure-scripts](https://github.com/aws-samples/automating-aws-migration-with-cloudendure-scripts) samples. 
 
