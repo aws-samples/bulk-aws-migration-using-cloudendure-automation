@@ -1,0 +1,280 @@
+#Cloud Formation for creating CloudEndure project
+
+#Copyright 2008-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+#Permission is hereby granted, free of charge, to any person obtaining a copy of this
+#software and associated documentation files (the "Software"), to deal in the Software
+#without restriction, including without limitation the rights to use, copy, modify,
+#merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+#permit persons to whom the Software is furnished to do so.
+
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+#INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+#PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+#HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+#OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+#SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template accepts parameters for creating a new account in your AWS Organization, with a baseline set of resources (fdp-1pg15bsqb)
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: Lambda configuration
+        Parameters:
+          - LambdaBucket
+          - LambdaKey
+
+      - Label:
+          default: Parameters for CloudEndure integration
+        Parameters:
+          - CloudEndureProjectType
+          - CloudEndureIAMUser
+          - CloudEndureIAMUserPassword
+          - CloudEndureUserName
+          - CloudEndureUserPassword
+          
+      - Label:
+          default: Parameters for CloudEndure Replication Server
+        Parameters:
+          - VpcId
+          - ReplicationSourceVPC
+
+Parameters:
+  LambdaBucket:
+    Type: String
+    MinLength: '1'
+    MaxLength: '60'
+    AllowedPattern: '.+'    
+    Description: S3 bucket where Lambda code is hosted
+    
+  LambdaKey:
+    Type: String
+    MinLength: '1'
+    MaxLength: '100'
+    AllowedPattern: '.+'    
+    Description: Lambda zip file name 
+    Default: "CloudEndureProjectLambda.zip"
+
+  CloudEndureProjectType:
+    Description: "Choose the type of project to be created in CloudEndure"
+    Type: String
+    Default: "MIGRATION"
+    AllowedValues:
+      - "MIGRATION"
+      - "DR"
+      - "BACKUP"
+      
+  CloudEndureIAMUser:
+    Type: String
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'    
+    Description: Username for the IAM user for CloudEndure 
+    
+  CloudEndureIAMUserPassword:
+    Type: String
+    NoEcho: true
+    MinLength: '1'
+    MaxLength: '41'
+    AllowedPattern: '.+'
+    Description: Password for the IAM user for CloudEndure 
+
+  CloudEndureUserName:
+    Type: String
+    MinLength: '1'
+    MaxLength: '41'
+    AllowedPattern: '.+'   
+    Description: Existing Username for CloudEndure 
+        
+  CloudEndureUserPassword:
+    Type: String
+    NoEcho: true
+    MinLength: '1'
+    MaxLength: '41'
+    AllowedPattern: '.+'
+    Description: Existing Password for CloudEndure
+    
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Migration target VPC ID
+    Default: ''
+    
+  ReplicationSourceNetwork:
+    Description: The IP address CIDR/range of migration source servers' network
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: '0.0.0.0/0'
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.    
+
+Resources:
+  CloudEndureProjectLambda:
+    DependsOn: CloudEndureUser
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: "CloudEndureProjectLambda.main"
+      Runtime: "python3.8"
+      Role: !GetAtt LambdaExecuteRole.Arn
+      Timeout: 300
+      Code:
+        S3Bucket: !Ref LambdaBucket
+        S3Key: !Ref LambdaKey
+      Environment:
+        Variables:
+          'CloudEndureUserName' : !Ref CloudEndureUserName
+          'CloudEndurePassword' : !Ref CloudEndureUserPassword
+
+  TriggerCloudEndureLambda:
+    Type: "Custom::TriggerCloudEndureLambda"
+    DeletionPolicy: Retain
+    Properties:
+      ServiceToken: !GetAtt CloudEndureProjectLambda.Arn
+      AccountId : !Ref "AWS::AccountId"
+      CloudEndureIAMUser : !Ref CloudEndureIAMUser
+      CloudEndureUserName : !Ref CloudEndureUserName
+      CloudEndureProjectType: !Ref CloudEndureProjectType
+
+  LambdaExecuteRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AdministratorAccess"
+      Path: "/"
+
+  CloudEndureUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: !Ref CloudEndureIAMUser
+      Path: /
+      LoginProfile:
+        Password: !Ref CloudEndureIAMUserPassword
+
+  CloudEndureUserGroup:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: CloudEndureUserGroup
+      Path: /
+
+  CloudEndurePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Groups:
+        - !Ref CloudEndureUserGroup
+      PolicyName: CloudEndurePolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+            -
+              Effect: "Allow"
+              Action:
+                - "ec2:*"
+                - "elasticloadbalancing:*"
+                - "cloudwatch:*"
+                - "autoscaling:*"
+                - "iam:GetUser"
+                - "iam:PassRole"
+                - "iam:ListInstanceProfiles"
+                - "kms:ListKeys"
+                - "mgh:*"
+                - "s3:*"
+              Resource: "*"
+              
+  EncryptionKey:
+    Type: AWS::KMS::Key
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Description: AWS KMS symmetric CMK for EBS volume encryption used by CloudEndure
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: key-default-1
+        Statement:
+        - Sid: Enable IAM User Permissions
+          Effect: Allow
+          Principal:
+            AWS:               
+              Fn::Join:
+                - ''
+                - - 'arn:aws:iam::'
+                  - Ref: AWS::AccountId
+                  - :root
+          Action: kms:*
+          Resource: '*'
+        - Sid: Allow administration of the key
+          Effect: Allow
+          Principal:
+            AWS: !GetAtt CloudEndureUser.Arn
+          Action:
+          - kms:Create*
+          - kms:Describe*
+          - kms:Update*
+          - kms:Get*
+          Resource: '*'               
+        - Sid: Allow use of the key
+          Effect: Allow
+          Principal:
+            AWS: !GetAtt CloudEndureUser.Arn
+          Action:
+          - kms:DescribeKey
+          - kms:Encrypt
+          - kms:Decrypt
+          - kms:ReEncrypt*
+          - kms:GenerateDataKey
+          - kms:GenerateDataKeyWithoutPlaintext
+          Resource: '*'  
+          
+  KeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: alias/CloudEndureKey
+      TargetKeyId:
+        Ref: EncryptionKey          
+
+  AddUserToGroup:
+    Type: 'AWS::IAM::UserToGroupAddition'
+    Properties:
+      GroupName: !Ref CloudEndureUserGroup
+      Users:
+        - !Ref CloudEndureUser
+        
+  ReplicaterSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref 'VpcId'
+      GroupName: 
+        !Join
+          - ''
+          - - 'CloudEndureReplicaterSecurityGroup-'
+            - !Ref 'AWS::StackName'
+      
+      GroupDescription: Security group for the replication server
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 1500
+          ToPort: 1500
+          CidrIp: !Ref 'ReplicationSourceNetwork'        
+
+Outputs:
+
+  CloudEndureLambda:
+    Description: ARN of CloudEndure project creation lambda function
+    Value: !GetAtt CloudEndureProjectLambda.Arn
+  ReplicaterSecurityGroup:
+    Description: Security group ID for the replication server
+    Value: !Ref ReplicaterSecurityGroup      
+  EncryptionKey:
+    Description: ARN of KMS key used for encryption of EBS volume
+    Value: !GetAtt EncryptionKey.Arn  
+  

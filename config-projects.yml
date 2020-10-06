@@ -1,0 +1,4 @@
+replication:
+    encryptionkey    : arn:aws:kms:eu-west-1:xxxxx:key/xxxxx
+    subnetID         : subnet-xxxx
+    securitygroupIDs  : [sg-xxxx]

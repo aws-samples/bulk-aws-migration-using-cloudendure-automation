@@ -1,0 +1,30 @@
+project:
+    waves             : prod_wave_1
+    machinecount      : 2
+machine1:
+    machineName       : webserver
+    subnetIDs         : [subnet-xxx]
+    securitygroupIDs  : [sg-xx]
+    instanceType      : t2.micro
+    iamRole           : None
+    tenancy           : SHARED
+    tags              :
+       count          : 2
+       key1           : Name
+       value1         : Web Server
+       key2           : ami_short_name
+       value2         : Amazon-Linux
+machine2:
+    machineName       : dbserver
+    subnetIDs         : [subnet-xxx]
+    securitygroupIDs  : [sg-xxx]
+    instanceType      : t2.micro
+    iamRole           : None
+    tenancy           : SHARED
+    tags              :
+       count          : 2
+       key1           : Name
+       value1         : DB Server
+       key2           : ami_short_name
+       value2         : Amazon-Linux
+

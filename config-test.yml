@@ -1,0 +1,34 @@
+project:
+    waves             : test_wave_1
+    machinecount      : 2
+machine1:
+    machineName       : webserver
+    subnetIDs         : [subnet-xxx]
+    securitygroupIDs  : [sg-xxx]
+    instanceType      : t2.micro
+    iamRole           : None
+    tenancy           : SHARED
+    tags              :
+       count          : 3
+       key1           : Name
+       value1         : WEBSERVER
+       key2           : migrated
+       value2         : 'true'
+       key3           : environment
+       value3         : TEST
+machine2:
+    machineName       : dbserver
+    subnetIDs         : [subnet-xx]
+    securitygroupIDs  : [sg-xxx]
+    instanceType      : t2.micro
+    iamRole           : None
+    tenancy           : SHARED
+    tags              :
+       count          : 3
+       key1           : Name
+       value1         : DBServer
+       key2           : migrated
+       value2         : 'true'
+       key3           : environment
+       value3         : TEST
+       
