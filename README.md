@@ -1,6 +1,10 @@
 
 # Automated bulk AWS migration using CloudEndure 
-Templates and scripts to automate the aws migration using CloudEndure.
+Generally as a part of migration we want to migrate the application ecosystem. We select applications and start migrating them one by one.
+This project is built for the same purpose, where you will select a specific application with number of servers for migration.
+You can select the specific application servers to migrate and after migration, you might re-architect the application hosted on them as per your modernization road map.
+
+It includes templates and scripts to automate the aws migration using CloudEndure.
 This solution is ideal for bulk migration of 2 to 25+ servers in one go.
 
 With this approach the servers are migrated in batches which is called as migration 'wave'.
@@ -14,6 +18,7 @@ The python scripts are referenced from the [automating-aws-migration-with-cloude
 1. Experience with the CloudEndure service, installing the agent, and using it from the console. Learn more about [how to use CloudEndure](https://docs.cloudendure.com/).
 2. CloudEndure account created. Fill the simple form to create CloudEndure account and note the credentials used. [Get started now with free CloudEndure Migration licenses](https://migration-register.cloudendure.com/). CloudEndure migration licenses are provided at no cost for customers and partners.
 3. Target AWS account to migrate the servers.
+We recommend to use the [AWS Control Tower](https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html) to manage the AWS multi-accounting environment. You can [plan and setup](https://docs.aws.amazon.com/controltower/latest/userguide/planning-your-deployment.html) the landing zone. The [AWS Organizations](https://aws.amazon.com/organizations/) will be used to effectively manage and structure the accounts as per requirements in Organization units. 
 
 ## Architecture
 ![Architecture diagram](CloudEndure-Migration-Pattern.png "Architecture")
