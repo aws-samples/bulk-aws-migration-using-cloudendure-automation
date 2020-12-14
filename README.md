@@ -13,6 +13,17 @@ If you have 50+ servers, it is recommended to use the Migration factory solution
 
 The python scripts are referenced from the [automating-aws-migration-with-cloudendure-scripts](https://github.com/aws-samples/automating-aws-migration-with-cloudendure-scripts) samples. 
 
+**The script will return an error if one of the following conditions is met:**
+
+The major advantage of this solution is, with CloudEndure console you can not enforce some of the below mentioned check which are very useful when you want to migrate many servers.
+
+- Launch type is cutover but the server has not been migrated to the test environment.
+- Launch type is cutover but the server has been migrated to the production environment already.
+- Clean up servers before cutover completes.
+- Migrate a server with more than 180 minutes lag.
+- Use an incorrect machine name or project name.
+- Launch a machine that hasn’t completed the initial replication.
+
 ## Prerequisites
 
 1. Experience with the CloudEndure service, installing the agent, and using it from the console. Learn more about [how to use CloudEndure](https://docs.cloudendure.com/).
@@ -40,8 +51,8 @@ We recommend to use the [AWS Control Tower](https://docs.aws.amazon.com/controlt
 - **MigrationExecutionServer.yml** - CloudFormation template to launch the Migration Execution server.
 
 ## Terminologies
-**Source machine(s)** - Server(s) which are intended to migrate on AWS
-**Target account** - AWS account where the source servers will be migrated & most part of this solution will run
+- **Source machine(s)** - Server(s) which are intended to migrate on AWS
+- **Target account** - AWS account where the source servers will be migrated & most part of this solution will run
 
 ## Migration Steps
 
@@ -96,7 +107,7 @@ scripts from the github repository as well as to call the CloudEndure APIs.
 - When Test environment launch is complete, please test the servers and application on it. If everything is OK, move ahead to launch the production environment(final).
 
 ### 7. Launch the Production Environment
- Like above, run the below on Migration Execution server for final end state Production environment.
+ Like above, run the below commands on Migration Execution server for final end state Production environment.
 
 - Validate YAML file syntax \
 `python3 CloudEndure.py --userapitoken <APIToken> --projectname <project name> --configfile config-cutover.yml --launchtype cutover --dryrun Yes`
