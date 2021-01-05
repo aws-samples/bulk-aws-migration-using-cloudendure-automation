@@ -55,6 +55,8 @@ We recommend to use the [AWS Control Tower](https://docs.aws.amazon.com/controlt
 - **Cleanup.py** – Python script to remove machines from CloudEndure after cut over.
 - **CreateCloudEndureProject.yml** - CloudFormation to create the CloudEndure project and AWS resources in target AWS account. 
 - **MigrationExecutionServer.yml** - CloudFormation template to launch the Migration Execution server.
+- **CreateImages.py** - Fetches instance IDs of launched/migrated ec2 (via CloudEndure) and trigger the image(AMI) creation.
+- **MigratedEc2Import.yml** - A sample CloudFormation template to import the migrated ec2 instance into CloudFormation stack.
 
 ## Terminologies
 - **Source machine(s)** - Server(s) which are intended to migrate on AWS
