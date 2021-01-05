@@ -1,0 +1,45 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Sample template structure - AWS CloudFormation Import CloudEndure migrated Ec2 instance
+Parameters:
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.large
+    Description: Enter t2.micro, or m1.large. Default is t2.micro.
+  InstanceSubnet:
+    Type: AWS::EC2::Subnet::Id
+    Description: SubnetID of where the instance will be placed
+  ImageID:
+    Type: AWS::EC2::Image::Id
+    Description: Image ID for the instance
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    
+Resources:
+  Ec2Instance: 
+    Type: AWS::EC2::Instance
+    DeletionPolicy: "Retain"
+    Properties: 
+      ImageId: !Ref ImageID
+      InstanceType: !Ref InstanceTypeParameter
+      NetworkInterfaces: 
+      - NetworkInterfaceId:
+         Ref: NetworkInterface
+        DeviceIndex: '0'
+      Tags:
+      - Key: "Label"
+        Value: "Migrated server 1"        
+          
+  NetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    DeletionPolicy: "Retain"    
+    Properties:
+      SubnetId: !Ref InstanceSubnet
+      GroupSet: 
+      - !Ref InstanceSecurityGroup
+      SourceDestCheck: true
+
+    

@@ -188,12 +188,13 @@ Resources:
           #!/bin/bash
           yum -y update          
           yum install python36 python36-virtualenv python36-pip git wget unzip -y
-          python3.6 -m pip install requests pyyaml
+          python3.6 -m pip install requests pyyaml boto3
           cd /home/ec2-user
           wget https://github.com/aws-samples/bulk-aws-migration-using-cloudendure-automation/archive/main.zip 
           unzip main && chmod -R 777 bulk-aws-migration-*
 
       InstanceType: !Ref 'InstanceType'
+      IamInstanceProfile: !Ref IAMInstanceProfile
       KeyName: !Ref 'KeyName'
       NetworkInterfaces:
       - AssociatePublicIpAddress: true
@@ -223,6 +224,41 @@ Resources:
           ToPort: 22
           CidrIp: !Ref 'SSHLocation'
           
+  IAMInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+      - !Ref IAMRole
+      InstanceProfileName: "AWSMigrationExecutionServer"     
+      
+  IAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "AWSMigrationExecutionServerRole"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Path: '/'
+      Policies:
+        - PolicyName: 'CreateImage'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'ec2:Describe*'
+                  - 'ec2:CreateSnapshot'
+                  - 'ec2:CreateImage'
+                  - 'ec2:CreateTags'
+                Resource: '*'
+      Tags:
+        - Key: Name
+          Value: "AWSMigrationExecutionServerRole"
+
 Outputs:
   InstanceId:
     Description: InstanceId of the Migration Execution server

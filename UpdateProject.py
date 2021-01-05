@@ -25,7 +25,7 @@ def update(session, headers, endpoint, HOST, projectname, configfile):
     with open(os.path.join(sys.path[0], configfile), 'r') as ymlfile:
             config = yaml.load(ymlfile, yaml.FullLoader)
     r = requests.get(HOST + endpoint.format('projects'), headers=headers, cookies=session)
-    print(r.text)
+
     if r.status_code != 200:
         print("ERROR: Failed to fetch the project....")
         sys.exit(1)
@@ -51,9 +51,9 @@ def update(session, headers, endpoint, HOST, projectname, configfile):
             replication["subnetId"] = config["replication"]["subnetID"]
             replication["replicatorSecurityGroupIDs"] = config["replication"]["securitygroupIDs"]
             eresult = requests.patch(HOST + url, data=json.dumps(replication), headers=headers, cookies=session)
-            print(eresult.status_code)
+
             if eresult.status_code == 200:
-               print("Encryption Key and replication server updated for project: " + projectname + "....")
+               print("Success - Encryption Key and replication server updated for project: " + projectname + "....")
             elif eresult.status_code == 400:
                print("ERROR: Updating Encryption key or replication server failed....")
                print("There is a conflict in the replication configuration. This can be due to: subnet ID which does not exist in the region, \

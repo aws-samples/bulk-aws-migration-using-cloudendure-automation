@@ -18,6 +18,7 @@ import sys
 import argparse
 import Machine
 import UpdateProject
+import CreateImages
 import requests
 import json
 import StatusCheck
@@ -66,6 +67,8 @@ def main(arguments):
     parser.add_argument('--statuscheck', default="No")
     parser.add_argument('--cleanup', default="No")
     parser.add_argument('--dryrun', default="No")
+    parser.add_argument('--createimage', default="No")
+    parser.add_argument('--region', default="")    
     args = parser.parse_args(arguments)
     
     print("************************")
@@ -85,7 +88,19 @@ def main(arguments):
     if args.dryrun != "No" and args.dryrun != "Yes":
         print("ERROR: Please type '--dryrun Yes' if you want to validate your production YAML file....")
         sys.exit(3)
-    
+
+    if args.createimage != "No" and args.createimage != "Yes":
+        print("ERROR: Please type '--createimage Yes' if you want to create Amazon EC2 Images(AMI) of the target instances....")
+        sys.exit(5)
+
+    if  args.createimage=="Yes" and args.region =="":
+        print("ERROR: Please provide valid ('--region <aws_region_name>') aws region(ex. us-west-1) to create EC2 Images(AMI) of the target instances....")
+        sys.exit(6)        
+
+    if  args.createimage=="Yes" and args.region != "":
+        CreateImages.createimage(session, headers, endpoint, HOST, args.projectname, args.configfile, args.region)
+        sys.exit(7)
+            
     if args.launchtype == "test" or args.launchtype =="cutover":
            if args.statuscheck == "No":
                Machine.execute(args.launchtype, session, headers, endpoint, HOST, args.projectname, args.configfile, args.dryrun)
