@@ -135,7 +135,7 @@ Once you confirm that the servers are migrated correctly, use below command to c
 - This will trigger the image creation for all the servers in that wave which are launched in 'cutover' mode. You can check the **AWS ec2 console > AMIs** for the list of images. The images are named after the server names it created from and also contains additional tags for identification.
 - These images will be used in further steps to create the CloudFormation stacks of the migrated servers. 
 
-### 9. Create the CloudFormation template for migrated servers
+### 9. Import migrated servers into CloudFormation
 Once the servers are migrated to AWS, we recommend to manage them with automation using CloudFormation and AWS ServiceCatalog. As AWS CloudFormation provides the functionality to adopt the existing resources as a CloudFormation stack; you can manage these migrated servers with Infrastructure as a code(IaaC). The CloudFormation stack will be used to create the Service Catalog product. This will add a governance functionality to the migrated server & also a self-service for administrator team. With this you can configure more parameters to the migrated server via CloudFormation and ServiceCatalog. And the Service catalog product will give the repeatable infrastructure creation capability.
  - To create the CloudFormation stack for each server migrated, use the file **MigratedEc2Import.yml** and edit as per the current and required configurations(ex. network interface) for that particular migrated instance. 
  - In target AWS account, goto **CloudFormation > Create Stack > With existing resources (import resources)**. Progress through the wizard. In second screen, specify the template which was edited in earlier step.
