@@ -143,16 +143,17 @@ Once the servers are migrated to AWS, we recommend to manage them with automatio
  - In **Specify stack details** window enter the additional details for the ec2 instance. These details will be same from the current ec2 instance. But the image id should be taken from the image we created in previous step. Click Next.
  - Review the **Import overview** screen and click on **Import resources**. This will trigger the import stack creation.
  - If everything goes well, you will see the status as **IMPORT_COMPLETE** which means success.
- - Goto the Stack info tab and copy the Stack ID. We will use the stack ID of the above imported stack to create the ServiceCatalog product.
+ - Goto the **Stack info** tab and copy the Stack ID. We will use the stack ID of the above imported stack to create the ServiceCatalog product.
  - To create the import stack for each migrated server, repeat the above steps for each one of them. This will create as many imported stack as you have migrated servers.
  
-### 10. Create ServiceCatalog Portfolio and product
+### 10. Create ServiceCatalog Portfolio, Product & import server(s) as a provisioned product
 - Goto **ServiceCatalog** console in target AWS account. From the left panel goto **Administration** > **Products**. On right side, click on **Upload new product**.
 - Fill the Product name and all the details. In **Version details** section , choose **Use an existing Cloudformation Stack**.
 - Enter the ARN of CloudFormation stack ID copied in earlier steps. Fill the remaining details and create the product.
 - Then from the left panel , click on **Portfolios** and create a portfolio if you don't have any. 
 - Click on the new portfolio and on the **Products** tab, click on **Add product to portfolio**. Select the product we created in earlier step and add it to portfolio.
 - Click on that portfolio and assign the correct permission(user, role) to it from the tab **Groups, roles, and users**. This will enable the assigned end users/roles to launch the product inside it.
+- **Importing migrated server as provisioned product** - From top left, select **Provisioned products** , click **Actions** and **Import stack**. In new window, fill the form with Imported stack ID(copied from earlier step), select the product we created in previous step, version, give provisioned product a name and click on **Import**. This we create a provisioned product for the migrated server. Using this product, one can manage this server through ServiceCatalog actions.
 - You need to repeat above steps for each product you created(i.e. for each migrated server). You can add all the products in single portfolio or create separate portfolio depending upon your structure.
 - Once all the servers are imported with CloudFormation and have their ServiceCatalog products ready, the end users can go and launch them if needed. With this method you can bring the migrated servers under the governance with automated administration. 
 
